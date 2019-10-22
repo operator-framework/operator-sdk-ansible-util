@@ -1,3 +1,6 @@
 # Ansible Collection - operator_sdk.util
 
-Documentation for the collection.
+A collection of Ansible assets for use with Ansible-based operators
+built with the operator-sdk.
+
+https://github.com/operator-framework/operator-sdk/

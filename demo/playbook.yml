@@ -1,0 +1,15 @@
+- hosts: localhost
+  # Syntax option 1
+  collections:
+    - operator_sdk.util
+  tasks:
+    - k8s_status:
+  # Syntax option 2
+  # tasks:
+  #   - operator_sdk.util.k8s_status:
+        api_version: cache.example.com/v1alpha1
+        kind: Memcached
+        name: example-memcached
+        namespace: default
+        status:
+          diditwork: "yes it did"
