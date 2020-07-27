@@ -1,0 +1,107 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from __future__ import absolute_import, division, print_function
+
+try:
+    from openshift.dynamic.exceptions import DynamicApiError
+except ImportError as exc:
+    class KubernetesException(Exception):
+        pass
+
+
+__metaclass__ = type
+
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'community'}
+
+DOCUMENTATION = '''
+
+module: requeue_after
+
+short_description: Set a period to an event object after which reconciliation should occur/continue.
+
+version_added: "2.7"
+
+author: "Venkat Ramaraju (@VenkatRamaraju)"
+
+description:
+  - Sets the time period read from the playbook to the JSON-returned object and can be accessed in event data 
+    during reconciliation.
+    
+options:
+  time:
+    type: str
+    description:
+    - A string containing a time period that will be set on the returned JSON object and then used to requeue 
+      reconciliation of an event. Time can be specified in hours, minutes, and seconds.
+
+'''
+
+EXAMPLES = '''
+
+- name: "Running the requeue_after module"
+    requeue_after: 
+        time: 24h
+        
+- name: "Running the requeue_after module"
+    requeue_after: 
+        time: 30m
+        
+- name: "Running the requeue_after module"
+    requeue_after: 
+        time: 5s
+
+'''
+
+RETURN = '''
+
+result:
+  description:
+  - If a requeue period was specified under 'time' when calling the requeue_after period from the module, 
+    this module will return a JSON object.  
+  returned: success
+  contains:
+    _ansible_no_log:
+       description: This is a boolean. If it’s True then the playbook specified no_log (in a task’s parameters or as 
+       a play parameter).
+       returned: success
+       type: boolean
+    changed:
+       description: A boolean indicating if the task had to make changes.
+       returned: success
+       type: boolean
+    invocation:
+       description: Information on how the module was invoked.
+       returned: success
+       type: map
+    period:
+       description: A time value read in from a playbook that specifies how long the reconciliation should be
+       requeued after.
+       returned: success
+       type: str
+
+'''
+
+from ansible.module_utils.basic import AnsibleModule
+
+
+def requeue_after():
+    module = AnsibleModule(argument_spec={
+        'time': {'type': 'str', 'required': False},
+    })
+
+    result = dict(
+        period=module.params['time'],
+    )
+
+    module.exit_json(**result)
+
+
+def main():
+    requeue_after()
+
+
+if __name__ == '__main__':
+    main()
