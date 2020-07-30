@@ -9,7 +9,6 @@ except ImportError as exc:
     class KubernetesException(Exception):
         pass
 
-
 __metaclass__ = type
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
@@ -20,22 +19,22 @@ DOCUMENTATION = '''
 
 module: requeue_after
 
-short_description: Set a period to an event object after which reconciliation should occur/continue.
+short_description: Tells the controller to re-trigger reconciliation after the specified time
 
-version_added: "2.7"
+version_added: "0.1"
 
 author: "Venkat Ramaraju (@VenkatRamaraju)"
 
 description:
-  - Sets the time period read from the playbook to the JSON-returned object and can be accessed in event data 
-    during reconciliation.
+  - Tells the controller to pause reconciliation and resume reconciliation after a specified amounts of time. 
+    If the requeue_reconciliation period is set to 't', reconciliation will occur in intervals of 't'.
     
 options:
   time:
     type: str
     description:
     - A string containing a time period that will be set on the returned JSON object and then used to requeue 
-      reconciliation of an event. Time can be specified in hours, minutes, and seconds.
+      reconciliation of an event. Time can be specified in any combination of hours, minutes, and seconds.
 
 '''
 
@@ -89,7 +88,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 def requeue_after():
     module = AnsibleModule(argument_spec={
-        'time': {'type': 'str', 'required': False},
+        'time': {'type': 'str', 'required': True},
     })
 
     result = dict(
