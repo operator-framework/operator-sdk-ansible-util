@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import, division, print_function
+from ansible.module_utils.basic import AnsibleModule
+import re
 
 try:
     from openshift.dynamic.exceptions import DynamicApiError
@@ -72,9 +74,6 @@ result:
        returned: success
        type: str
 '''
-
-from ansible.module_utils.basic import AnsibleModule
-import re
 
 
 def requeue_after():
