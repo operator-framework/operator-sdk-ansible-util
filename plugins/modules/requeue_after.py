@@ -5,12 +5,6 @@ from __future__ import absolute_import, division, print_function
 from ansible.module_utils.basic import AnsibleModule
 import re
 
-try:
-    from openshift.dynamic.exceptions import DynamicApiError
-except ImportError as exc:
-    class KubernetesException(Exception):
-        pass
-
 __metaclass__ = type
 
 ANSIBLE_METADATA = {'metadata_version': '1.1',
