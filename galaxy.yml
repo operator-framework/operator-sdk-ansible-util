@@ -9,7 +9,7 @@ namespace: operator_sdk
 name: util
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 0.0.0
+version: 0.1.0
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -19,6 +19,7 @@ readme: README.md
 authors:
 - Austin Macdonald <austin@redhat.com>
 - Fabian von Feilitzsch <fabian@redhat.com>
+- Venkat Ramaraju <venky2063@gmail.com>
 
 ### OPTIONAL but strongly recommended
 
