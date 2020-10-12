@@ -6,8 +6,23 @@ from __future__ import absolute_import, division, print_function
 import re
 import copy
 
-from ansible.module_utils.k8s.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, KubernetesAnsibleModule
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils._text import to_native
 
+try:
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+        AUTH_ARG_SPEC,
+        COMMON_ARG_SPEC,
+        NAME_ARG_SPEC,
+        KubernetesAnsibleModule,
+    )
+    HAS_KUBERNETES_COLLECTION = True
+except ImportError as e:
+    HAS_KUBERNETES_COLLECTION = False
+    k8s_collection_import_exception = e
+    K8S_COLLECTION_ERROR = traceback.format_exc()
+    KubernetesAnsibleModule = AnsibleModule
+    AUTH_ARG_SPEC = NAME_ARG_SPEC = COMMON_ARG_SPEC = {}
 try:
     from openshift.dynamic.exceptions import DynamicApiError
 except ImportError as exc:
@@ -35,6 +50,10 @@ description:
   - Sets the status field on a Kubernetes API resource. Only should be used if you are using Ansible to
     implement a controller for the resource being modified.
 
+extends_documentation_fragment:
+  - community.kubernetes.k8s_auth_options
+  - community.kubernetes.k8s_name_options
+
 options:
   status:
     type: dict
@@ -56,72 +75,10 @@ options:
       `lastHeartbeatTime` (RFC3339 datetime string), and
       `lastTransitionTime` (RFC3339 datetime string).'
     - One of I(status) or I(conditions) is required.'
-  api_version:
-    description:
-    - Use to specify the API version. Use in conjunction with I(kind), I(name), and I(namespace) to identify a
-      specific object.
-    required: yes
-    aliases:
-    - api
-    - version
-  kind:
-    description:
-    - Use to specify an object model. Use in conjunction with I(api_version), I(name), and I(namespace) to identify a
-      specific object.
-    required: yes
-  name:
-    description:
-    - Use to specify an object name. Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a
-      specific object.
-    required: yes
-  namespace:
-    description:
-    - Use to specify an object namespace. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specific object.
   force:
     description:
     - If set to C(True), the status will be set using `PUT` rather than `PATCH`, replacing the full status object.
     default: false
-    type: bool
-  host:
-    description:
-    - Provide a URL for accessing the API. Can also be specified via K8S_AUTH_HOST environment variable.
-  api_key:
-    description:
-    - Token used to authenticate with the API. Can also be specified via K8S_AUTH_API_KEY environment variable.
-  kubeconfig:
-    description:
-    - Path to an instance Kubernetes config file. If not provided, and no other connection
-      options are provided, the openshift client will attempt to load the default
-      configuration file from I(~/.kube/config.json). Can also be specified via K8S_AUTH_KUBECONFIG environment
-      variable.
-  context:
-    description:
-    - The name of a context found in the config file. Can also be specified via K8S_AUTH_CONTEXT environment variable.
-  username:
-    description:
-    - Provide a username for authenticating with the API. Can also be specified via K8S_AUTH_USERNAME environment
-      variable.
-  password:
-    description:
-    - Provide a password for authenticating with the API. Can also be specified via K8S_AUTH_PASSWORD environment
-      variable.
-  cert_file:
-    description:
-    - Path to a certificate used to authenticate with the API. Can also be specified via K8S_AUTH_CERT_FILE environment
-      variable.
-  key_file:
-    description:
-    - Path to a key file used to authenticate with the API. Can also be specified via K8S_AUTH_KEY_FILE environment
-      variable.
-  ssl_ca_cert:
-    description:
-    - Path to a CA certificate used to authenticate with the API. Can also be specified via K8S_AUTH_SSL_CA_CERT
-      environment variable.
-  verify_ssl:
-    description:
-    - "Whether or not to verify the API server's SSL certificates. Can also be specified via K8S_AUTH_VERIFY_SSL
-      environment variable."
     type: bool
 
 requirements:
@@ -251,6 +208,12 @@ def main():
 class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
 
     def __init__(self, *args, **kwargs):
+        if not HAS_KUBERNETES_COLLECTION:
+            self.fail_json(
+                msg="The community.kubernetes collection must be installed",
+                exception=K8S_COLLECTION_ERROR,
+                error=to_native(k8s_collection_import_exception)
+            )
         KubernetesAnsibleModule.__init__(
             self, *args,
             supports_check_mode=True,
@@ -393,10 +356,9 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
     def argspec(self):
         args = copy.deepcopy(COMMON_ARG_SPEC)
         args.pop('state')
-        args.pop('resource_definition')
-        args.pop('src')
         args.update(AUTH_ARG_SPEC)
         args.update(STATUS_ARG_SPEC)
+        args.update(NAME_ARG_SPEC)
         return args
 
 
