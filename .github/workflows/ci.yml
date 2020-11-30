@@ -16,7 +16,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          path: operator-framework/operator-sdk-ansilbe-util
+          path: ansible_collections/operator-framework/kubernetes
       
       - name: Set up KinD cluster
         uses: engineerd/setup-kind@v0.5.0
@@ -31,8 +31,7 @@ jobs:
       
       - name: Run molecule default test scenario
         run: molecule test
-        working-directory: ./operator-framework/operator-sdk-ansilbe-util
-
+        working-directory: ./ansible_collections/operator-framework/kubernetes
   sanity:
     runs-on: ubuntu-latest
     strategy:
@@ -42,7 +41,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          path: operator-framework/operator-sdk-ansilbe-util
+          path: ansible_collections/operator-framework/kubernetes
       
       - name: Set up KinD cluster
         uses: engineerd/setup-kind@v0.5.0
@@ -57,4 +56,4 @@ jobs:
       
       - name: Run sanity tests
         run: ansible-test sanity --docker -v --color --python ${{ matrix.python_version }}
-        working-directory: ./operator-framework/operator-sdk-ansilbe-util
+        working-directory: ./ansible_collections/operator-framework/kubernetes
