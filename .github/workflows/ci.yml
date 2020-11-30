@@ -16,12 +16,19 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
         with:
-          path: ansible_collections/community/kubernetes
+          path: operator-framework/operator-sdk-ansilbe-util
+      
+      - name: Set up KinD cluster
+        uses: engineerd/setup-kind@v0.5.0
 
       - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python_version }}
-
-      - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+      
+      - name: Install molecule and openshift dependencies
+        run: pip install ansible molecule yamllint openshift flake8
+      
+      - name: Run molecule default test scenario
+        run: molecule test
+        working-directory: ./operator-framework/operator-sdk-ansilbe-util
