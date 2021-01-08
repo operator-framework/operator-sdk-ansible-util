@@ -50,7 +50,7 @@ result:
   returned: success
   contains:
     _ansible_no_log:
-       description: This is a boolean. If it’s True then the playbook specified no_log (in a task’s parameters or as 
+       description: This is a boolean. If it's True then the playbook specified no_log (in a task’s parameters or as 
        a play parameter).
        returned: success
        type: boolean
