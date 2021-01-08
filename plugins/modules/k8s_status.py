@@ -24,10 +24,6 @@ description:
   - Sets the status field on a Kubernetes API resource. Only should be used if you are using Ansible to
     implement a controller for the resource being modified.
 
-extends_documentation_fragment:
-  - community.kubernetes.k8s_auth_options
-  - community.kubernetes.k8s_name_options
-
 options:
   status:
     type: dict
