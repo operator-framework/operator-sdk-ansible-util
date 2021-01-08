@@ -221,6 +221,7 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
         self.name = self.params.get('name')
         self.namespace = self.params.get('namespace')
         self.force = self.params.get('force')
+        self.items = dict()
 
         self.status = self.params.get('status') or {}
         self.conditions = self.params.get('conditions') or []
