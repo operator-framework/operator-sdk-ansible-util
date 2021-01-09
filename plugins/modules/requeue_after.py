@@ -15,7 +15,7 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 module: requeue_after
 short_description: Tells the controller to re-trigger reconciliation after the specified time
-version_added: "0.1"
+version_added: "0.0.1"
 author: "Venkat Ramaraju (@VenkatRamaraju)"
 description:
   - Tells the controller to pause reconciliation and resume reconciliation after a specified amounts of time.
@@ -49,6 +49,7 @@ result:
   - If a requeue period was specified under 'time' when calling the requeue_after period from the module,
     this module will return a JSON object.
   returned: success
+  type: complex
   contains:
     _ansible_no_log:
        description: This is a boolean. If it's True then the playbook specified no_log (in a task's parameters or as a play parameter).
