@@ -30,15 +30,15 @@ options:
 """
 
 EXAMPLES = """
-- name: "Running the requeue_after module"
+- name:
     requeue_after:
         time: 24h
 
-- name: "Running the requeue_after module"
+- name:
     requeue_after:
         time: 30m
 
-- name: "Running the requeue_after module"
+- name:
     requeue_after:
         time: 5s
 """
