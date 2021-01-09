@@ -212,9 +212,9 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
         )
         if not HAS_KUBERNETES_COLLECTION:
             self.fail_json(
-            msg="The community.kubernetes collection must be installed",
-            exception=K8S_COLLECTION_ERROR,
-            error=to_native(k8s_collection_import_exception)
+              msg="The community.kubernetes collection must be installed",
+              exception=K8S_COLLECTION_ERROR,
+              error=to_native(k8s_collection_import_exception)
         )
         self.kind = self.params.get('kind')
         self.api_version = self.params.get('api_version')
