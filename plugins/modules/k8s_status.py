@@ -1,6 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import, division, print_function
+
+
+__metaclass__ = type
+
 ANSIBLE_METADATA = {
     "metadata_version": "1.1",
     "status": ["preview"],
@@ -121,15 +126,12 @@ result:
 """
 
 
-from __future__ import absolute_import, division, print_function
 import re
 import copy
 import traceback
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils._text import to_native
-
-__metaclass__ = type
 
 try:
     from ansible_collections.community.kubernetes.plugins.module_utils.common import (
