@@ -50,8 +50,7 @@ result:
   returned: success
   contains:
     _ansible_no_log:
-       description: This is a boolean. If it's True then the playbook specified no_log (in a task's parameters or as 
-       a play parameter).
+       description: This is a boolean. If it's True then the playbook specified no_log (in a task's parameters or as a play parameter).
        returned: success
        type: boolean
     changed:
@@ -63,8 +62,7 @@ result:
        returned: success
        type: map
     period:
-       description: A time value read in from a playbook that specifies how long the reconciliation should be
-       requeued after.
+       description: A time value read in from a playbook that specifies how long the reconciliation should be requeued after.
        returned: success
        type: str
 '''
