@@ -223,7 +223,7 @@ def main():
 class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
     def __init__(self, *args, **kwargs):
         KubernetesAnsibleModule.__init__(
-            self, *args, suports_check_mode=True, **kwargs
+            self, *args, **kwargs
         )
         if not HAS_KUBERNETES_COLLECTION:
             self.fail_json(
