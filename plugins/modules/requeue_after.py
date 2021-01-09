@@ -19,36 +19,36 @@ short_description: Tells the controller to re-trigger reconciliation after the s
 version_added: "0.1"
 author: "Venkat Ramaraju (@VenkatRamaraju)"
 description:
-  - Tells the controller to pause reconciliation and resume reconciliation after a specified amounts of time. 
+  - Tells the controller to pause reconciliation and resume reconciliation after a specified amounts of time.
     If the requeue_reconciliation period is set to 't', reconciliation will occur in intervals of 't'.
 
 options:
   time:
     type: str
     description:
-    - A string containing a time period that will be set on the returned JSON object and then used to requeue 
+    - A string containing a time period that will be set on the returned JSON object and then used to requeue
       reconciliation of an event. Time can be specified in any combination of hours, minutes, and seconds.
 """
 
 EXAMPLES = """
 - name: "Running the requeue_after module"
-    requeue_after: 
+    requeue_after:
         time: 24h
 
 - name: "Running the requeue_after module"
-    requeue_after: 
+    requeue_after:
         time: 30m
 
 - name: "Running the requeue_after module"
-    requeue_after: 
+    requeue_after:
         time: 5s
 """
 
 RETURN = """
 result:
   description:
-  - If a requeue period was specified under 'time' when calling the requeue_after period from the module, 
-    this module will return a JSON object.  
+  - If a requeue period was specified under 'time' when calling the requeue_after period from the module,
+    this module will return a JSON object.
   returned: success
   contains:
     _ansible_no_log:
