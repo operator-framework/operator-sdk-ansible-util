@@ -37,7 +37,7 @@ options:
     - Unless I(force) is C(true) the specified conditions will be merged with the conditions already set on the status field of the specified resource.
     - Each element in the list will be validated according to the conventions specified in the
       [Kubernetes API conventions document](https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status).
-    - 'The fields supported for each condition are
+    - 'The fields supported for each condition are:
       `type` (required),
       `status` (required, one of "True", "False", "Unknown"),
       `reason` (single CamelCase word),
@@ -221,7 +221,6 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
         self.name = self.params.get('name')
         self.namespace = self.params.get('namespace')
         self.force = self.params.get('force')
-        self.items = dict()
 
         self.status = self.params.get('status') or {}
         self.conditions = self.params.get('conditions') or []
