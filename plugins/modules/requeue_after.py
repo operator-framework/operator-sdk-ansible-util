@@ -24,6 +24,7 @@ description:
 options:
   time:
     type: str
+    required: True
     description:
     - A string containing a time period that will be set on the returned JSON object and then used to requeue
       reconciliation of an event. Time can be specified in any combination of hours, minutes, and seconds.
