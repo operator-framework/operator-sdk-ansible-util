@@ -54,15 +54,15 @@ result:
     _ansible_no_log:
        description: This is a boolean. If it's True then the playbook specified no_log (in a task's parameters or as a play parameter).
        returned: success
-       type: boolean
+       type: bool
     changed:
        description: A boolean indicating if the task had to make changes.
        returned: success
-       type: boolean
+       type: bool
     invocation:
        description: Information on how the module was invoked.
        returned: success
-       type: map
+       type: dict
     period:
        description: A time value read in from a playbook that specifies how long the reconciliation should be requeued after.
        returned: success
