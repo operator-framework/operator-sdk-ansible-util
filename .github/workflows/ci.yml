@@ -28,7 +28,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install molecule and openshift dependencies
-        run: pip install ansible molecule yamllint openshift flake8
+        run: pip install ansible==2.9.15 molecule yamllint openshift flake8
         
       - name: Ensure collection dependancy exists
         run: ansible-galaxy collection install community.kubernetes
@@ -57,7 +57,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
       
       - name: Install molecule and openshift dependencies
-        run: pip install ansible molecule yamllint openshift flake8
+        run: pip install ansible==2.9.15 molecule yamllint openshift flake8
       
       - name: Ensure collection dependancy exists
         run: ansible-galaxy collection install community.kubernetes
