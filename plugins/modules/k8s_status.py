@@ -6,11 +6,13 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
+ANSIBLE_METADATA = {
+    "metadata_version": "1.1",
+    "status": ["preview"],
+    "supported_by": "community",
+}
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 
 module: k8s_status
 
@@ -23,10 +25,6 @@ author: "Fabian von Feilitzsch (@fabianvf)"
 description:
   - Sets the status field on a Kubernetes API resource. Only should be used if you are using Ansible to
     implement a controller for the resource being modified.
-
-extends_documentation_fragment:
-  - community.kubernetes.k8s_auth_options
-  - community.kubernetes.k8s_name_options
 
 options:
   status:
@@ -59,9 +57,9 @@ requirements:
     - "python >= 3.7"
     - "openshift >= 0.8.1"
     - "PyYAML >= 3.11"
-'''
+"""
 
-EXAMPLES = '''
+EXAMPLES = """
 - name: Set custom status fields on TestCR
   k8s_status:
     api_version: apps.example.com/v1alpha1
@@ -96,9 +94,9 @@ EXAMPLES = '''
       reason: PingFailed
       message: "The service did not respond to a ping"
 
-'''
+"""
 
-RETURN = '''
+RETURN = """
 result:
   description:
   - If a change was made, will return the patched object, otherwise returns the instance object.
@@ -125,7 +123,8 @@ result:
        description: Current status details for the object.
        returned: success
        type: dict
-'''
+"""
+
 
 import re
 import copy
@@ -141,6 +140,7 @@ try:
         NAME_ARG_SPEC,
         KubernetesAnsibleModule,
     )
+
     HAS_KUBERNETES_COLLECTION = True
 except ImportError as e:
     HAS_KUBERNETES_COLLECTION = False
@@ -151,39 +151,59 @@ except ImportError as e:
 try:
     from openshift.dynamic.exceptions import DynamicApiError
 except ImportError:
+
     class KubernetesException(Exception):
         pass
 
 
 def condition_array(conditions):
 
-    VALID_KEYS = ['type', 'status', 'reason', 'message', 'lastHeartbeatTime', 'lastTransitionTime']
-    REQUIRED = ['type', 'status']
-    CAMEL_CASE = re.compile(r'^(?:[A-Z]*[a-z]*)+$')
-    RFC3339_datetime = re.compile(r'^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)$')
+    VALID_KEYS = [
+        "type",
+        "status",
+        "reason",
+        "message",
+        "lastHeartbeatTime",
+        "lastTransitionTime",
+    ]
+    REQUIRED = ["type", "status"]
+    CAMEL_CASE = re.compile(r"^(?:[A-Z]*[a-z]*)+$")
+    RFC3339_datetime = re.compile(
+        r"^\d{4}-\d\d-\d\dT\d\d:\d\d(:\d\d)?(\.\d+)?(([+-]\d\d:\d\d)|Z)$"
+    )
 
     def validate_condition(condition):
         if not isinstance(condition, dict):
-            raise ValueError('`conditions` must be a list of objects')
-        if isinstance(condition.get('status'), bool):
-            condition['status'] = 'True' if condition['status'] else 'False'
+            raise ValueError("`conditions` must be a list of objects")
+        if isinstance(condition.get("status"), bool):
+            condition["status"] = "True" if condition["status"] else "False"
 
         for key in condition.keys():
             if key not in VALID_KEYS:
-                raise ValueError('{0} is not a valid field for a condition, accepted fields are {1}'.format(key, VALID_KEYS))
+                raise ValueError(
+                    "{0} is not a valid field for a condition, accepted fields are {1}".format(
+                        key, VALID_KEYS
+                    )
+                )
         for key in REQUIRED:
             if not condition.get(key):
-                raise ValueError('Condition `{0}` must be set'.format(key))
+                raise ValueError("Condition `{0}` must be set".format(key))
 
-        if condition['status'] not in ['True', 'False', 'Unknown']:
-            raise ValueError('Condition `status` must be one of ["True", "False", "Unknown"], not {0}'.format(condition['status']))
+        if condition["status"] not in ["True", "False", "Unknown"]:
+            raise ValueError(
+                'Condition `status` must be one of ["True", "False", "Unknown"], not {0}'.format(
+                    condition["status"]
+                )
+            )
 
-        if condition.get('reason') and not re.match(CAMEL_CASE, condition['reason']):
-            raise ValueError('Condition `reason` must be a single, CamelCase word')
+        if condition.get("reason") and not re.match(CAMEL_CASE, condition["reason"]):
+            raise ValueError("Condition `reason` must be a single, CamelCase word")
 
-        for key in ['lastHeartBeatTime', 'lastTransitionTime']:
+        for key in ["lastHeartBeatTime", "lastTransitionTime"]:
             if condition.get(key) and not re.match(RFC3339_datetime, condition[key]):
-                raise ValueError('`{0}` must be a RFC3339 compliant datetime string'.format(key))
+                raise ValueError(
+                    "`{0}` must be a RFC3339 compliant datetime string".format(key)
+                )
 
         return condition
 
@@ -191,14 +211,9 @@ def condition_array(conditions):
 
 
 STATUS_ARG_SPEC = {
-    'status': {
-        'type': 'dict',
-        'required': False
-    },
-    'conditions': {
-        'type': condition_array,
-        'required': False
-    }
+    "status": {"type": "dict", "required": False},
+    "conditions": {"type": "list", "required": False},
+    "force": {"type": "bool", "required": False, "default": False},
 }
 
 
@@ -207,48 +222,53 @@ def main():
 
 
 class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
-
     def __init__(self, *args, **kwargs):
+        KubernetesAnsibleModule.__init__(
+            self, *args, argument_spec=STATUS_ARG_SPEC, supports_check_mode=True, **kwargs
+        )
         if not HAS_KUBERNETES_COLLECTION:
             self.fail_json(
                 msg="The community.kubernetes collection must be installed",
                 exception=K8S_COLLECTION_ERROR,
-                error=to_native(k8s_collection_import_exception)
+                error=to_native(k8s_collection_import_exception),
             )
-        KubernetesAnsibleModule.__init__(
-            self, *args,
-            supports_check_mode=True,
-            **kwargs
-        )
-        self.kind = self.params.get('kind')
-        self.api_version = self.params.get('api_version')
-        self.name = self.params.get('name')
-        self.namespace = self.params.get('namespace')
-        self.force = self.params.get('force')
+        self.kind = self.params.get("kind")
+        self.api_version = self.params.get("api_version")
+        self.name = self.params.get("name")
+        self.namespace = self.params.get("namespace")
+        self.force = self.params.get("force")
 
-        self.status = self.params.get('status') or {}
-        self.conditions = self.params.get('conditions') or []
+        self.status = self.params.get("status") or {}
+        self.conditions = self.params.get("conditions") or []
 
-        if self.conditions and self.status and self.status.get('conditions'):
-            raise ValueError("You cannot specify conditions in both the `status` and `conditions` parameters")
+        if self.conditions and self.status and self.status.get("conditions"):
+            raise ValueError(
+                "You cannot specify conditions in both the `status` and `conditions` parameters"
+            )
 
         if self.conditions:
-            self.status['conditions'] = self.conditions
+            self.status["conditions"] = self.conditions
 
     def execute_module(self):
         self.client = self.get_api_client()
 
         resource = self.find_resource(self.kind, self.api_version, fail=True)
-        if 'status' not in resource.subresources:
-            self.fail_json(msg='Resource {0}.{1} does not support the status subresource'.format(resource.api_version, resource.kind))
+        if "status" not in resource.subresources:
+            self.fail_json(
+                msg="Resource {0}.{1} does not support the status subresource".format(
+                    resource.api_version, resource.kind
+                )
+            )
 
         try:
             instance = resource.get(name=self.name, namespace=self.namespace).to_dict()
         except DynamicApiError as exc:
-            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(exc),
-                           error=exc.summary())
+            self.fail_json(
+                msg="Failed to retrieve requested object: {0}".format(exc),
+                error=exc.summary(),
+            )
         # Make sure status is at least initialized to an empty dict
-        instance['status'] = instance.get('status', {})
+        instance["status"] = instance.get("status", {})
 
         if self.force:
             self.exit_json(**self.replace(resource, instance))
@@ -256,21 +276,20 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
             self.exit_json(**self.patch(resource, instance))
 
     def replace(self, resource, instance):
-        if self.status == instance['status']:
-            return {'result': instance, 'changed': False}
-        instance['status'] = self.status
+        if self.status == instance["status"]:
+            return {"result": instance, "changed": False}
+        instance["status"] = self.status
         try:
-            result = resource.status.replace(body=instance).to_dict(),
+            result = (resource.status.replace(body=instance).to_dict(),)
         except DynamicApiError as exc:
-            self.fail_json(msg='Failed to replace status: {0}'.format(exc), error=exc.summary())
+            self.fail_json(
+                msg="Failed to replace status: {0}".format(exc), error=exc.summary()
+            )
 
-        return {
-            'result': result,
-            'changed': True
-        }
+        return {"result": result, "changed": True}
 
     def clean_last_transition_time(self, status):
-        '''clean_last_transition_time removes lastTransitionTime attribute from each status.conditions[*] (from old conditions).
+        """clean_last_transition_time removes lastTransitionTime attribute from each status.conditions[*] (from old conditions).
         It returns copy of status with updated conditions. Copy of status is returned, because if new conditions
         are subset of old conditions, then module would return conditions without lastTransitionTime. Updated status
         should be used only for check in object_contains function, not for next updates, because otherwise it can create
@@ -285,58 +304,64 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
 
         Returns:
           dict: copy of status with updated conditions
-        '''
+        """
         updated_old_status = copy.deepcopy(status)
 
-        for item in updated_old_status.get('conditions', []):
-            if 'lastTransitionTime' in item:
-                del item['lastTransitionTime']
+        for item in updated_old_status.get("conditions", []):
+            if "lastTransitionTime" in item:
+                del item["lastTransitionTime"]
 
         return updated_old_status
 
     def patch(self, resource, instance):
         # Remove lastTransitionTime from status.conditions[*] and use updated_old_status only for check in object_contains function.
         # Updates of conditions should be done only with original data not with updated_old_status.
-        updated_old_status = self.clean_last_transition_time(instance['status'])
+        updated_old_status = self.clean_last_transition_time(instance["status"])
         if self.object_contains(updated_old_status, self.status):
-            return {'result': instance, 'changed': False}
-        instance['status'] = self.merge_status(instance['status'], self.status)
+            return {"result": instance, "changed": False}
+        instance["status"] = self.merge_status(instance["status"], self.status)
         try:
-            result = resource.status.patch(body=instance, content_type='application/merge-patch+json').to_dict()
+            result = resource.status.patch(
+                body=instance, content_type="application/merge-patch+json"
+            ).to_dict()
         except DynamicApiError as exc:
-            self.fail_json(msg='Failed to replace status: {0}'.format(exc), error=exc.summary())
+            self.fail_json(
+                msg="Failed to replace status: {0}".format(exc), error=exc.summary()
+            )
 
-        return {
-            'result': result,
-            'changed': True
-        }
+        return {"result": result, "changed": True}
 
     def merge_status(self, old, new):
-        old_conditions = old.get('conditions', [])
-        new_conditions = new.get('conditions', [])
+        old_conditions = old.get("conditions", [])
+        new_conditions = new.get("conditions", [])
         if not (old_conditions and new_conditions):
             return new
 
         merged = copy.deepcopy(old_conditions)
 
         for condition in new_conditions:
-            idx = self.get_condition_idx(merged, condition['type'])
+            idx = self.get_condition_idx(merged, condition["type"])
             if idx is not None:
                 merged[idx] = condition
             else:
                 merged.append(condition)
-        new['conditions'] = merged
+        new["conditions"] = merged
         return new
 
     def get_condition_idx(self, conditions, name):
         for i, condition in enumerate(conditions):
-            if condition.get('type') == name:
+            if condition.get("type") == name:
                 return i
         return None
 
     def object_contains(self, obj, subset):
         def dict_is_subset(obj, subset):
-            return all([mapping.get(type(obj.get(k)), mapping['default'])(obj.get(k), v) for (k, v) in subset.items()])
+            return all(
+                [
+                    mapping.get(type(obj.get(k)), mapping["default"])(obj.get(k), v)
+                    for (k, v) in subset.items()
+                ]
+            )
 
         def list_is_subset(obj, subset):
             return all(item in obj for item in subset)
@@ -348,7 +373,7 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
             dict: dict_is_subset,
             list: list_is_subset,
             tuple: list_is_subset,
-            'default': values_match
+            "default": values_match,
         }
 
         return dict_is_subset(obj, subset)
@@ -356,12 +381,12 @@ class KubernetesAnsibleStatusModule(KubernetesAnsibleModule):
     @property
     def argspec(self):
         args = copy.deepcopy(COMMON_ARG_SPEC)
-        args.pop('state')
+        args.pop("state")
         args.update(AUTH_ARG_SPEC)
         args.update(STATUS_ARG_SPEC)
         args.update(NAME_ARG_SPEC)
         return args
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

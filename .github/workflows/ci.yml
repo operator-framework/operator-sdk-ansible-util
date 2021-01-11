@@ -2,9 +2,37 @@ name: ci
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   
 jobs:
-  test:
+
+  sanity:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ['2.7', '3.7']
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/operator_sdk/util
+
+      - name: Set up KinD cluster
+        uses: engineerd/setup-kind@v0.5.0
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install molecule and openshift dependencies
+        run: pip install ansible==2.9.15 molecule yamllint openshift flake8
+        
+      - name: Ensure collection dependancy exists
+        run: ansible-galaxy collection install community.kubernetes
+
+      - name: Run sanity tests on Python ${{ matrix.python_version }}
+        run: ansible-test sanity --docker -v --color --python ${{ matrix.python_version }}
+        working-directory: ./ansible_collections/operator_sdk/util

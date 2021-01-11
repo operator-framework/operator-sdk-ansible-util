@@ -1,0 +1,2 @@
+plugins/modules/k8s_status.py validate-modules:missing-gplv3-license
+plugins/modules/requeue_after.py validate-modules:missing-gplv3-license
