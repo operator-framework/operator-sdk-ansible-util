@@ -33,7 +33,7 @@ options:
     - 'An object containing key: value pairs that will be set on the status object of the specified resource.'
     - One of I(status) or I(conditions) is required.
   conditions:
-    type: condition_array
+    type: "list"
     description:
     - A list of condition objects that will be set on the status.conditions field of the specified resource.
     - Unless I(force) is C(true) the specified conditions will be merged with the conditions already set on the status field of the specified resource.
@@ -212,8 +212,8 @@ def condition_array(conditions):
 
 STATUS_ARG_SPEC = {
     "status": {"type": "dict", "required": False},
-    "conditions": {"type": condition_array, "required": False},
-    "force": {"type": "bool", "required": False},
+    "conditions": {"type": "list", "required": False},
+    "force": {"type": "bool", "required": False, "default": False},
 }
 
 
