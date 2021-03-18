@@ -1,0 +1,41 @@
+---
+- name: Converge
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  collections:
+    - community.kubernetes
+    - operator_sdk.util
+
+  tasks:
+    - name: Verify cluster is working.
+      k8s_info:
+        namespace: kube-system
+        kind: Pod
+      register: pod_list
+
+    - name: Verify cluster has more than 5 pods running.
+      assert:
+        that: (pod_list.resources | count) > 5
+
+    - name: Create CRD
+      k8s:
+        src: files/crd.yaml
+
+    - block:
+        - name: Create namespace
+          k8s:
+            kind: Namespace
+            name: test-ns
+
+        - import_tasks: tasks/doc_examples.yml
+          vars:
+            namespace: test-ns
+      always:
+        - name: Clean up namespace
+          k8s:
+            kind: Namespace
+            name: test-ns
+            state: absent
+            wait: yes
