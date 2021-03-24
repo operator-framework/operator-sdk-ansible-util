@@ -212,6 +212,14 @@ def main():
     KubernetesAnsibleStatusModule().execute_module()
 
 
+def format_api_error(exc):
+    return dict(
+        status=exc.status,
+        reason=exc.reason,
+        body=exc.body,
+    )
+
+
 def validate_conditions(conditions):
 
     VALID_KEYS = [
@@ -271,7 +279,7 @@ def get_api_client(module=None):
 
     def _raise_or_fail(exc, message):
         if module:
-            module.fail_json(message % to_native(exc))
+            module.fail_json(msg=message, error=to_native(exc))
         else:
             raise exc
 
@@ -348,7 +356,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         super(KubernetesAnsibleStatusModule, self).__init__(*args, argument_spec=self.argspec, **kwargs)
         if not HAS_K8S_MODULE_HELPER:
             self.fail_json(
-                message=missing_required_lib('openshift'),
+                msg=missing_required_lib('openshift'),
                 exception=K8S_IMP_ERR,
                 error=to_native(k8s_import_exception))
         self.openshift_version = openshift.__version__
@@ -375,11 +383,11 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
 
         resource = find_resource(self.client, self.kind, self.api_version)
         if resource is None:
-            self.fail_json(message='Failed to find exact match for {0}.{1} by [kind, name, singularName, shortNames]'.format(self.api_version, self.kind))
+            self.fail_json(msg='Failed to find exact match for {0}.{1} by [kind, name, singularName, shortNames]'.format(self.api_version, self.kind))
 
         if not resource.subresources or "status" not in resource.subresources:
             self.fail_json(
-                message="Resource {0}.{1} does not support the status subresource".format(
+                msg="Resource {0}.{1} does not support the status subresource".format(
                     resource.api_version, resource.kind
                 )
             )
@@ -388,8 +396,8 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
             instance = resource.get(name=self.name, namespace=self.namespace).to_dict()
         except DynamicApiError as exc:
             self.fail_json(
-                message="Failed to retrieve requested object: {0}".format(exc),
-                error=exc.summary(),
+                msg="Failed to retrieve requested object",
+                error=format_api_error(exc),
             )
         # Make sure status is at least initialized to an empty dict
         instance["status"] = instance.get("status", {})
@@ -407,7 +415,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
             result = (resource.status.replace(body=instance).to_dict(),)
         except DynamicApiError as exc:
             self.fail_json(
-                message="Failed to replace status: {0}".format(exc), error=exc.summary()
+                msg="Failed to replace status: {0}".format(exc), error=format_api_error(exc)
             )
 
         return {"result": result, "changed": True}
@@ -450,7 +458,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
             ).to_dict()
         except DynamicApiError as exc:
             self.fail_json(
-                message="Failed to replace status: {0}".format(exc), error=exc.summary()
+                msg="Failed to replace status: {0}".format(exc), error=format_api_error(exc)
             )
 
         return {"result": result, "changed": True}

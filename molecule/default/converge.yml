@@ -27,15 +27,32 @@
         - name: Create namespace
           k8s:
             kind: Namespace
-            name: test-ns
+            name: osdkau-test-doc-examples
 
         - import_tasks: tasks/doc_examples.yml
           vars:
-            namespace: test-ns
+            namespace: osdkau-test-doc-examples
       always:
         - name: Clean up namespace
           k8s:
             kind: Namespace
-            name: test-ns
+            name: osdkau-test-doc-examples
+            state: absent
+            wait: yes
+
+    - block:
+        - name: Create namespace
+          k8s:
+            kind: Namespace
+            name: osdkau-test-failure-modes
+
+        - import_tasks: tasks/failure_modes.yml
+          vars:
+            namespace: osdkau-test-failure-modes
+      always:
+        - name: Clean up namespace
+          k8s:
+            kind: Namespace
+            name: osdkau-test-failure-modes
             state: absent
             wait: yes
