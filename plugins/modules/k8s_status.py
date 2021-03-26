@@ -41,7 +41,7 @@ options:
     elements: dict
     description:
     - A list of condition objects that will be set on the status.conditions field of the specified resource.
-    - Unless I(force) is C(true) the specified conditions will be merged with the conditions already set on the status field of the specified resource.
+    - Unless I(replace) is C(true) the specified conditions will be merged with the conditions already set on the status field of the specified resource.
     - Each element in the list will be validated according to the conventions specified in the
       [Kubernetes API conventions document](https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status).
     - One of I(status) or I(conditions) is required.'
@@ -76,10 +76,12 @@ options:
         description:
           - An RFC3339 formatted datetime string
         type: str
-  force:
+  replace:
     description:
     - If set to C(True), the status will be set using `PUT` rather than `PATCH`, replacing the full status object.
     default: false
+    aliases:
+      - force
     type: bool
 
 requirements:
@@ -204,7 +206,7 @@ CONDITIONS_ARG_SPEC = {
 STATUS_ARG_SPEC = {
     "status": {"type": "dict", "required": False},
     "conditions": CONDITIONS_ARG_SPEC,
-    "force": {"type": "bool", "required": False, "default": False},
+    "replace": {"type": "bool", "required": False, "default": False},
 }
 
 
@@ -365,7 +367,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         self.api_version = self.params.get("api_version")
         self.name = self.params.get("name")
         self.namespace = self.params.get("namespace")
-        self.force = self.params.get("force")
+        self.replace = self.params.get("replace")
 
         self.status = self.params.get("status") or {}
         self.conditions = validate_conditions(self.params.get("conditions") or [])
@@ -402,7 +404,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         # Make sure status is at least initialized to an empty dict
         instance["status"] = instance.get("status", {})
 
-        if self.force:
+        if self.replace:
             self.exit_json(**self.replace(resource, instance))
         else:
             self.exit_json(**self.patch(resource, instance))
