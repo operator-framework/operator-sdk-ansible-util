@@ -12,7 +12,7 @@ build: clean
 	ansible-galaxy collection build
 
 release: build
-	ansible-galaxy collection publish operator_sdk-util-${VERSION}.tar.gz
+	ansible-galaxy collection publish operator_sdk-util-${VERSION}.tar.gz --api-key ${GALAXY_API_KEY}
 
 install: build
 	ansible-galaxy collection install -p ansible_collections operator_sdk-util-${VERSION}.tar.gz
