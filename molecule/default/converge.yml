@@ -44,6 +44,23 @@
         - name: Create namespace
           k8s:
             kind: Namespace
+            name: osdkau-test-advanced-usage
+
+        - import_tasks: tasks/advanced_usage.yml
+          vars:
+            namespace: osdkau-test-advanced-usage
+      always:
+        - name: Clean up namespace
+          k8s:
+            kind: Namespace
+            name: osdkau-test-advanced-usage
+            state: absent
+            wait: yes
+
+    - block:
+        - name: Create namespace
+          k8s:
+            kind: Namespace
             name: osdkau-test-failure-modes
 
         - import_tasks: tasks/failure_modes.yml

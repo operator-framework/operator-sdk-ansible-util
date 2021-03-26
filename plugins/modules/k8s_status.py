@@ -36,6 +36,8 @@ options:
     description:
     - 'An object containing key: value pairs that will be set on the status object of the specified resource.'
     - One of I(status) or I(conditions) is required.
+    - If you use I(conditions), you cannot include a conditions field beneath status.
+    - If you add a conditions field under status, it will not be validated like conditions specified through I(conditions) are.
   conditions:
     type: list
     elements: dict
@@ -206,7 +208,7 @@ CONDITIONS_ARG_SPEC = {
 STATUS_ARG_SPEC = {
     "status": {"type": "dict", "required": False},
     "conditions": CONDITIONS_ARG_SPEC,
-    "replace": {"type": "bool", "required": False, "default": False},
+    "replace": {"type": "bool", "required": False, "default": False, "aliases": ["force"]},
 }
 
 
@@ -257,18 +259,18 @@ def validate_conditions(conditions):
 
         if condition["status"] not in ["True", "False", "Unknown"]:
             raise ValueError(
-                'Condition `status` must be one of ["True", "False", "Unknown"], not {0}'.format(
+                "Condition 'status' must be one of [\"True\", \"False\", \"Unknown\"], not {0}".format(
                     condition["status"]
                 )
             )
 
         if condition.get("reason") and not re.match(CAMEL_CASE, condition["reason"]):
-            raise ValueError("Condition `reason` must be a single, CamelCase word")
+            raise ValueError("Condition 'reason' must be a single, CamelCase word")
 
         for key in ["lastHeartBeatTime", "lastTransitionTime"]:
             if condition.get(key) and not re.match(RFC3339_datetime, condition[key]):
                 raise ValueError(
-                    "`{0}` must be a RFC3339 compliant datetime string".format(key)
+                    "'{0}' must be an RFC3339 compliant datetime string".format(key)
                 )
 
         return condition
@@ -367,15 +369,16 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         self.api_version = self.params.get("api_version")
         self.name = self.params.get("name")
         self.namespace = self.params.get("namespace")
-        self.replace = self.params.get("replace")
+        self.replace_status = self.params.get("replace")
 
         self.status = self.params.get("status") or {}
-        self.conditions = validate_conditions(self.params.get("conditions") or [])
+        try:
+            self.conditions = validate_conditions(self.params.get("conditions") or [])
+        except ValueError as exc:
+            self.fail_json(msg="The specified conditions failed to validate", error=to_native(exc))
 
         if self.conditions and self.status and self.status.get("conditions"):
-            raise ValueError(
-                "You cannot specify conditions in both the `status` and `conditions` parameters"
-            )
+            self.fail_json(msg="You cannot specify conditions in both the 'status' and 'conditions' parameters")
 
         if self.conditions:
             self.status["conditions"] = self.conditions
@@ -404,7 +407,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         # Make sure status is at least initialized to an empty dict
         instance["status"] = instance.get("status", {})
 
-        if self.replace:
+        if self.replace_status:
             self.exit_json(**self.replace(resource, instance))
         else:
             self.exit_json(**self.patch(resource, instance))
