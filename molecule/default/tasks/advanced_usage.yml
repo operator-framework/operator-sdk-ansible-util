@@ -1,0 +1,159 @@
+---
+- name: Create TestCR resource
+  k8s:
+    definition:
+      apiVersion: apps.example.com/v1alpha1
+      kind: TestCR
+      metadata:
+        namespace: '{{ namespace }}'
+        name: my-test
+      spec:
+        size: 2
+
+- name: Set status and conditions on TestCR using the status field
+  k8s_status:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+    status:
+      hello: world
+      conditions:
+        - type: Available
+          status: "False"
+          reason: PingFailed
+          message: "The service did not respond to a ping"
+
+- name: Get the custom resource
+  k8s_info:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+  register: test_cr
+
+- debug: var=test_cr
+
+- assert:
+    that:
+      - test_cr.resources.0.status.hello == 'world'
+      - condition.type == 'Available'
+      - condition.status == 'False'
+      - condition.reason == 'PingFailed'
+      - condition.message == 'The service did not respond to a ping'
+  vars:
+    condition: '{{ (test_cr.resources.0.status.conditions | selectattr("type", "equalto", "Available") | list).0 }}'
+
+- name: Patch status and conditions on TestCR using the status field
+  k8s_status:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+    status:
+      hello: everybody
+      conditions:
+        - type: Available
+          status: "True"
+          reason: PingSucceeded
+          message: "The service responded to a ping"
+        - type: Test
+          status: "True"
+          reason: NoReason
+
+- name: Get the custom resource
+  k8s_info:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+  register: test_cr
+
+- debug: var=test_cr
+
+- assert:
+    that:
+      - test_cr.resources.0.status.hello == 'everybody'
+      - (test_cr.resources.0.status.conditions | length) == 2
+      - (matches | length) == 1
+      - available_condition.type == 'Available'
+      - available_condition.status == 'True'
+      - available_condition.reason == 'PingSucceeded'
+      - available_condition.message == 'The service responded to a ping'
+      - test_condition.type == 'Test'
+      - test_condition.status == 'True'
+      - test_condition.reason == 'NoReason'
+  vars:
+    matches: '{{ (test_cr.resources.0.status.conditions | selectattr("type", "equalto", "Available") | list) }}'
+    available_condition: '{{ matches.0 }}'
+    test_condition: '{{ (test_cr.resources.0.status.conditions | selectattr("type", "equalto", "Test") | list).0 }}'
+
+- name: Replace status and conditions on TestCR using the status field
+  k8s_status:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+    replace: yes
+    status:
+      conditions:
+        - type: Available
+          status: "False"
+          reason: PingFailed
+          message: "The service did not respond to a ping"
+
+- name: Get the custom resource
+  k8s_info:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+  register: test_cr
+
+- debug: var=test_cr
+
+- assert:
+    that:
+      - test_cr.resources.0.status.hello is not defined
+      - condition.type == 'Available'
+      - condition.status == 'False'
+      - condition.reason == 'PingFailed'
+      - condition.message == 'The service did not respond to a ping'
+  vars:
+    condition: '{{ (test_cr.resources.0.status.conditions | selectattr("type", "equalto", "Available") | list).0 }}'
+
+- name: Replace status and conditions on TestCR using both the status and condition fields
+  k8s_status:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+    force: yes
+    status:
+      hello: world
+    conditions:
+      - type: Available
+        status: "True"
+        reason: PingSucceeded
+        message: "The service responded to a ping"
+
+- name: Get the custom resource
+  k8s_info:
+    api_version: apps.example.com/v1alpha1
+    kind: TestCR
+    name: my-test
+    namespace: '{{ namespace }}'
+  register: test_cr
+
+- debug: var=test_cr
+
+- assert:
+    that:
+      - test_cr.resources.0.status.hello == 'world'
+      - condition.type == 'Available'
+      - condition.status == 'True'
+      - condition.reason == 'PingSucceeded'
+      - condition.message == 'The service responded to a ping'
+      - (test_cr.resources.0.status.conditions | length) == 1
+  vars:
+    condition: '{{ (test_cr.resources.0.status.conditions | selectattr("type", "equalto", "Available") | list).0 }}'

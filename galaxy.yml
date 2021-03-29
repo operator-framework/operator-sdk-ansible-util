@@ -9,7 +9,7 @@ namespace: operator_sdk
 name: util
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 0.1.0
+version: 0.2.0
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -43,8 +43,7 @@ tags: ['operator_sdk', 'kubernetes', 'k8s', 'k8s_status', 'ansible_operator']
 # collection label 'namespace.name'. The value is a version range
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
-dependencies:
-  community.kubernetes: '>=1.1.0'
+dependencies: {}
 
 # The URL of the originating SCM repository
 repository: https://github.com/operator-framework/operator-sdk-ansible-util

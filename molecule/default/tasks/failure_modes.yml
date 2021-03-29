@@ -1,0 +1,110 @@
+---
+- name: Create TestCR resource
+  k8s:
+    definition:
+      apiVersion: apps.example.com/v1alpha1
+      kind: TestCR
+      metadata:
+        namespace: '{{ namespace }}'
+        name: my-test
+      spec:
+        size: 2
+
+- block:
+    - name: Set custom status fields on a CR that does not exist
+      k8s_status:
+        api_version: apps.example.com/v1alpha1
+        kind: TestCR
+        name: dne
+        namespace: '{{ namespace }}'
+        status:
+          hello: world
+      register: test_cr_failed_1
+  rescue:
+    - assert:
+        that:
+          - test_cr_failed_1 is failed
+          - test_cr_failed_1.msg == 'Failed to retrieve requested object'
+          - test_cr_failed_1.error.status == 404
+          - test_cr_failed_1.error.reason == 'Not Found'
+
+- block:
+    - name: Set custom status fields on a CR that is not defined
+      k8s_status:
+        api_version: apps.example.com/v1alpha1
+        kind: DNECR
+        name: dne
+        namespace: '{{ namespace }}'
+        status:
+          hello: world
+      register: test_cr_failed_2
+  rescue:
+    - assert:
+        that:
+          - test_cr_failed_2 is failed
+          - test_cr_failed_2.msg.startswith('Failed to find exact match for')
+
+- block:
+    - name: Set conditions from the status and conditions fields
+      k8s_status:
+        api_version: apps.example.com/v1alpha1
+        kind: TestCR
+        name: my-test
+        namespace: '{{ namespace }}'
+        status:
+          hello: world
+          conditions:
+            - type: Test
+              status: "Unknown"
+              reason: NoReason
+        conditions:
+          - type: Available
+            status: "False"
+            reason: PingFailed
+            message: "The service did not respond to a ping"
+      register: test_cr_failed_3
+  rescue:
+    - assert:
+        that:
+          - test_cr_failed_2 is failed
+          - test_cr_failed_3.msg == "You cannot specify conditions in both the 'status' and 'conditions' parameters"
+- block:
+    - name: Set invalid reason on condition
+      k8s_status:
+        api_version: apps.example.com/v1alpha1
+        kind: TestCR
+        name: my-test
+        namespace: '{{ namespace }}'
+        conditions:
+          - type: Available
+            status: "False"
+            reason: The Ping Failed
+            message: "The service did not respond to a ping"
+      register: test_cr_failed_4
+  rescue:
+    - assert:
+        that:
+          - test_cr_failed_4 is failed
+          - test_cr_failed_4.msg == "The specified conditions failed to validate"
+          - test_cr_failed_4.error == "Condition 'reason' must be a single, CamelCase word"
+
+- block:
+    - name: Set invalid lastTransitionTime on condition
+      k8s_status:
+        api_version: apps.example.com/v1alpha1
+        kind: TestCR
+        name: my-test
+        namespace: '{{ namespace }}'
+        conditions:
+          - type: Available
+            status: "False"
+            reason: PingFailed
+            message: "The service did not respond to a ping"
+            lastTransitionTime: "26/03/2021 2:00PM"
+      register: test_cr_failed_5
+  rescue:
+    - assert:
+        that:
+          - test_cr_failed_5 is failed
+          - test_cr_failed_5.msg == "The specified conditions failed to validate"
+          - test_cr_failed_5.error == "'lastTransitionTime' must be an RFC3339 compliant datetime string"
