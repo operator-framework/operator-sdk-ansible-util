@@ -246,13 +246,16 @@ def validate_conditions(conditions):
         if isinstance(condition.get("status"), bool):
             condition["status"] = "True" if condition["status"] else "False"
 
-        for key in condition.keys():
+        for key in condition.copy().keys():
             if key not in VALID_KEYS:
                 raise ValueError(
                     "{0} is not a valid field for a condition, accepted fields are {1}".format(
                         key, VALID_KEYS
                     )
                 )
+            # remove keys with None value, to be able to compare with updated_old_status
+            if condition[key] is None:
+                del condition[key]
         for key in REQUIRED:
             if not condition.get(key):
                 raise ValueError("Condition `{0}` must be set".format(key))
@@ -267,7 +270,7 @@ def validate_conditions(conditions):
         if condition.get("reason") and not re.match(CAMEL_CASE, condition["reason"]):
             raise ValueError("Condition 'reason' must be a single, CamelCase word")
 
-        for key in ["lastHeartBeatTime", "lastTransitionTime"]:
+        for key in ["lastHeartbeatTime", "lastTransitionTime"]:
             if condition.get(key) and not re.match(RFC3339_datetime, condition[key]):
                 raise ValueError(
                     "'{0}' must be an RFC3339 compliant datetime string".format(key)
@@ -432,7 +435,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         should be used only for check in object_contains function, not for next updates, because otherwise it can create
         a mess with lastTransitionTime attribute.
 
-        If new onditions don't contain lastTransitionTime and they are different from old conditions
+        If new conditions don't contain lastTransitionTime and they are different from old conditions
         (e.g. they have different status), conditions are updated and kubernetes should sets lastTransitionTime
         field during update. If new conditions contain lastTransitionTime, then conditions are updated.
 
