@@ -85,6 +85,11 @@ options:
     aliases:
       - force
     type: bool
+  replace_lists:
+    description:
+    - If set to C(True), any lists except `conditions` will be fully replaced if mismatched.
+    default: false
+    type: bool
 
 requirements:
     - "python >= 3.7"
@@ -209,6 +214,7 @@ STATUS_ARG_SPEC = {
     "status": {"type": "dict", "required": False},
     "conditions": CONDITIONS_ARG_SPEC,
     "replace": {"type": "bool", "required": False, "default": False, "aliases": ["force"]},
+    "replace_lists": {"type": "bool", "required": False, "default": False},
 }
 
 
@@ -373,6 +379,7 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         self.name = self.params.get("name")
         self.namespace = self.params.get("namespace")
         self.replace_status = self.params.get("replace")
+        self.replace_lists = self.params.get("replace_lists")
 
         self.status = self.params.get("status") or {}
         try:
@@ -498,7 +505,11 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         def dict_is_subset(obj, subset):
             return all(
                 [
-                    mapping.get(type(obj.get(k)), mapping["default"])(obj.get(k), v)
+                    (
+                        mapping["default"]
+                        if self.replace_lists and isinstance(obj.get(k), list) and k != "conditions"
+                        else mapping.get(type(obj.get(k)), mapping["default"])
+                    )(obj.get(k), v)
                     for (k, v) in subset.items()
                 ]
             )
