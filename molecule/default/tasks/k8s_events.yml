@@ -1,0 +1,39 @@
+---
+- name: Create TestCR resource
+  k8s:
+    definition:
+      apiVersion: apps.example.com/v1alpha1
+      kind: TestCR
+      metadata:
+        namespace: '{{ namespace }}'
+        name: my-test
+      spec:
+        size: 2
+
+- name: Create a k8s event
+  k8s_event:
+    namespace: '{{ namespace }}'
+    name: test-name
+    message: test-message
+    reason: test-reason
+    involvedObject:
+      apiVersion: apps.example.com/v1alpha1
+      kind: Event
+      name: test-involved-object
+      namespace: '{{ namespace }}'
+
+- name: Get the Event
+  k8s_info:
+    kind: Event
+    name: test-name
+    namespace: '{{ namespace }}'
+  register: event_obj
+
+- debug: var=event_obj
+
+- assert:
+    that:
+      - event_obj.resources.0.metadata.name == 'test-name'
+      - event_obj.resources.0.message == 'test-message'
+      - event_obj.resources.0.reason == 'test-reason'
+      - event_obj.resources.0.involvedObject.name == 'test-involved-object'
