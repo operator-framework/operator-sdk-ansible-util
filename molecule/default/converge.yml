@@ -73,3 +73,20 @@
             name: osdkau-test-failure-modes
             state: absent
             wait: yes
+
+    - block:
+        - name: Create namespace
+          k8s:
+            kind: Namespace
+            name: osdkau-test-k8s-events
+
+        - import_tasks: tasks/k8s_events.yml
+          vars:
+            namespace: osdkau-test-k8s-events
+      always:
+        - name: Clean up namespace
+          k8s:
+            kind: Namespace
+            name: osdkau-test-k8s-events
+            state: absent
+            wait: yes
