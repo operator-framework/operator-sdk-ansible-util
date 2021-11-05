@@ -31,6 +31,10 @@ options:
     required: True
     description:
     - The description of the prometheus metric, used for help text
+  address:
+    type: str
+    required: False
+    default: "http://localhost:5050"
   counter:
     type: dict
     required: False
@@ -50,31 +54,14 @@ options:
 """
 
 EXAMPLES = """
-- name: create my_counter_metric
-  osdk_metric:
-    name: my_counter_metric
-    description: Random counter metric
-    counter: {}
-
-- name: increment my_counter_metric
-  osdk_metric:
-    name: my_counter_metric
-    description: Random counter metric
-    counter:
-      increment: yes
-
-- name: add 3.14 to my_counter_metric
-  osdk_metric:
-    name: my_counter_metric
-    description: Random counter metric
-    counter:
-      add: 3.14
 """
 
 RETURN = """
 """
 
 
+import json
+import requests
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -83,14 +70,34 @@ def main():
         argument_spec={
             "name": {"type": "str", "required": True},
             "description": {"type": "str", "required": True},
+            "address": {"type": "str", "required": False, "default": "http://localhost:5050/metrics"},
             "counter": {"type": "dict", "required": False, "options": {
                 "increment": {"type": "bool", "required": False},
                 "add": {"type": "float", "required": False},
             }},
+            "guage": {"type": "dict", "required": False, "options": {}},
+            "histogram": {"type": "dict", "required": False, "options": {}},
+            "summary": {"type": "dict", "required": False, "options": {}},
         }
     )
 
-    module.exit_json(**module.params)
+    payload = dict(name=module.params.get("name"), description=module.params.get("description"))
+
+    url = module.params.get("address")
+    if module.params.get('counter'):
+        payload["counter"] = module.params["counter"]
+    if module.params.get('guage'):
+        payload["guage"] = module.params["guage"]
+    if module.params.get('histogram'):
+        payload["histogram"] = module.params["histogram"]
+    if module.params.get('summary'):
+        payload["summary"] = module.params["summary"]
+
+    response = requests.post(url, json=payload)
+    if response.status_code != 200:
+        module.fail_json(msg=response.text)
+
+    module.exit_json(changed=True)
 
 
 if __name__ == "__main__":
