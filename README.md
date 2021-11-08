@@ -36,21 +36,36 @@ To run the molecule integration tests, ensure you have molecule and the openshif
 make test-molecule
 ```
 
-### Build and Publish Collection
+### Release Docs
 
-Before building the collection, edit `galaxy.yml` and update the
-version.
+To perform a release, do the following steps:
+1. Branch:
+   - If this is a z-stream bump, go to the minor version branch.
+   - If this is a minor version bump, create a new branch ``release-<semantic-version-number>``. For example: ``release-0.3``.
 
-**Build the collection:**
+
+2. Change the version in Makefile and galaxy.yml to the new semantic version.
+
+
+3. Run ``make build`` to generate a zip of the release.
+
+
+4. If it's a minor version bump, open a pull request against the master branch of the main repository.
+
+
+5. Once the pull request in step 5 gets merged, push a tag that named by the semantic version number of this release. Ex: v0.3.1
+
+
+6. Draft a release on that tag. The release notes should list the changes since the last release, as well as a zip of the current version. This zip is generated from step 3.
+
+
+7. Publish the collection using the steps below.
+
+
+### Publish Collection
 
 ```
-$ make build
-```
-
-**Publish the collection:**
-
-```
-$ GALAXY_API_KEY=... make publish
+$ make release GALAXY_API_KEY=...
 ```
 
 You can find your galaxy api key at https://galaxy.ansible.com/me/preferences
