@@ -76,7 +76,7 @@ def main():
                 "increment": {"type": "bool", "required": False},
                 "add": {"type": "float", "required": False},
             }},
-            "guage": {"type": "dict", "required": False, "options": {
+            "gauge": {"type": "dict", "required": False, "options": {
                 "set": {"type": "float", "required": False},
                 "increment": {"type": "bool", "required": False},
                 "decrement": {"type": "bool", "required": False},
