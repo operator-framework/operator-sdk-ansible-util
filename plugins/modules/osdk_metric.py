@@ -59,7 +59,7 @@ TODO(asmacdo)
 
 RETURN = """
 """
-
+wjj
 
 import json
 import requests
@@ -94,8 +94,8 @@ def main():
     url = module.params.get("address")
     if module.params.get('counter'):
         payload["counter"] = module.params["counter"]
-    if module.params.get('guage'):
-        payload["guage"] = module.params["guage"]
+    if module.params.get('gauge'):
+        payload["gauge"] = module.params["gauge"]
     if module.params.get('histogram'):
         payload["histogram"] = module.params["histogram"]
     if module.params.get('summary'):
