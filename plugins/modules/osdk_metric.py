@@ -59,7 +59,6 @@ TODO(asmacdo)
 
 RETURN = """
 """
-wjj
 
 import json
 import requests
