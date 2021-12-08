@@ -51,6 +51,44 @@ options:
         required: False
         description:
         - Instructs the controller to add the value to the counter
+
+  gauge:
+    type: dict
+    required: False
+    description:
+    - Instructs the controller to create a prometheus gauge metric
+    suboptions:
+      set:
+        type: float
+        required: False
+        description:
+        - Instructs the controller to set the gauge to the provided value
+      increment:
+        type: bool
+        required: False
+        description:
+        - Instructs the controller to increment the gauge
+      decrement:
+        type: bool
+        required: False
+        description:
+        - Instructs the controller to decrement the gauge
+      add:
+        type: float
+        required: False
+        description:
+        - Instructs the controller to add the value to the gauge
+      subtract:
+        type: float
+        required: False
+        description:
+        - Instructs the controller to subract the value from the gauge
+      set_to_current_time:
+        type: bool
+        required: False
+        description:
+        - Instructs the controller to reset the gauge time. TODO(asmacdo)
+
 """
 
 EXAMPLES = """
@@ -81,7 +119,6 @@ def main():
                 "decrement": {"type": "bool", "required": False},
                 "add": {"type": "float", "required": False},
                 "subtract": {"type": "float", "required": False},
-                # TODO(asmacdo) how d oyou use this?
                 "set_to_current_time": {"type": "bool", "required": False},
             }},
             "histogram": {"type": "dict", "required": False, "options": {
