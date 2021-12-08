@@ -81,10 +81,15 @@ def main():
                 "decrement": {"type": "bool", "required": False},
                 "add": {"type": "float", "required": False},
                 "subtract": {"type": "float", "required": False},
+                # TODO(asmacdo) how d oyou use this?
                 "set_to_current_time": {"type": "bool", "required": False},
             }},
-            "histogram": {"type": "dict", "required": False, "options": {}},
-            "summary": {"type": "dict", "required": False, "options": {}},
+            "histogram": {"type": "dict", "required": False, "options": {
+                "observe": {"type": "float", "required": False},
+            }},
+            "summary": {"type": "dict", "required": False, "options": {
+                "observe": {"type": "float", "required": False},
+            }},
         }
     )
 
