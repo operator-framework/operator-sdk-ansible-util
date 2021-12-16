@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install ansible and openshift dependencies
-        run: pip install ansible~=2.9.27 yamllint openshift flake8 pycodestyle pylint requests
+        run: pip install ansible~=2.9.27 yamllint openshift flake8 pycodestyle pylint 
 
       - name: Ensure collection dependency exists
         run: ansible-galaxy collection install community.kubernetes

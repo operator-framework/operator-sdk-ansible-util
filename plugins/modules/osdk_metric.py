@@ -99,8 +99,8 @@ RETURN = """
 """
 
 import json
-import requests
 from ansible.module_utils.basic import AnsibleModule
+
 
 
 def main():
@@ -129,6 +129,10 @@ def main():
             }},
         }
     )
+    try:
+        import requests
+    except ImportError:
+        module.fail_json('`requests` is not installed, please install via pip or pipenv.')
 
     payload = dict(name=module.params.get("name"), description=module.params.get("description"))
 
