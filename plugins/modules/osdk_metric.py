@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+# Copyright: (c) 2021,  Red Hat | Ansible
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 from __future__ import absolute_import, division, print_function
 
 
@@ -34,7 +37,9 @@ options:
   address:
     type: str
     required: False
-    default: "http://localhost:5050"
+    default: "http://localhost:5050/metrics"
+    description:
+    - The addresss of the Operator SDK metrics server
   counter:
     type: dict
     required: False
@@ -51,7 +56,6 @@ options:
         required: False
         description:
         - Instructs the controller to add the value to the counter
-
   gauge:
     type: dict
     required: False
@@ -88,7 +92,28 @@ options:
         required: False
         description:
         - Instructs the controller to reset the gauge time. TODO(asmacdo)
-
+  histogram:
+    type: dict
+    required: False
+    description:
+    - Instructs the controller to create a prometheus histogram metric
+    suboptions:
+      observe:
+        type: float
+        required: False
+        description:
+        - Adds a single observation to the historgram.
+  summary:
+    type: dict
+    required: False
+    description:
+    - Instructs the controller to create a prometheus summary metric
+    suboptions:
+      observe:
+        type: float
+        required: False
+        description:
+        - Adds a single observation to the summary.
 """
 
 EXAMPLES = """
