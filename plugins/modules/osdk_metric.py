@@ -17,11 +17,12 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = """
 module: osdk_metric
-short_description: Communicates a metric to be created or updated to the controller
+short_description: Communicates a custom prometheus metrics to an Operator SDK metrics server
 version_added: "0.0.1"
 author: "Fabian von Feilitzsch (@fabianvf)"
 description:
-  - Tells the controller to create or update a prometheus metric
+  - Communicates custom metrics to a server to be created or updated
+  - Please reference the Prometheus docs for metric usage https://prometheus.io/docs/concepts/metric_types/
 
 options:
   name:
@@ -117,8 +118,42 @@ options:
 """
 
 EXAMPLES = """
-TODO(asmacdo)
-"""
+- name: Create a counter metric by using its name for the first time
+  osdk_metric:
+    name: my_thing_counter
+    description: This metric counts things
+    counter: {}
+
+- name: Operate on a metric by specifying the name of an existing metric
+  osdk_metric:
+    name: my_counter_metric
+    description: Add 3.14 to the counter
+    counter:
+      increment: yes
+
+- name: Gauges can be set to a specific value.
+  osdk_metric:
+    name: my_gauge_metric
+    description: Create my gague and set it to 2.
+    gauge:
+      set: 2
+
+- name: Observe a Histogram
+  osdk_metric:
+    name: my_histogram_metric
+    description: Observe my histogram
+    histogram:
+      observe: 2
+
+- name: Observe a Summary
+  osdk_metric:
+    name: my_summary_metric
+    description: Observe my summary
+    summary:
+      observe: 2
+
+# TODO(asmacdo) what happens if you use a different metric type for an existing metric name?
+- """
 
 RETURN = """
 """
