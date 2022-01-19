@@ -18,8 +18,10 @@ ANSIBLE_METADATA = {
 DOCUMENTATION = """
 module: osdk_metric
 short_description: Communicates a custom prometheus metrics to an Operator SDK metrics server
-version_added: "0.0.1"
-author: "Fabian von Feilitzsch (@fabianvf)"
+version_added: "0.4.0"
+author:
+    - "Fabian von Feilitzsch (@fabianvf)"
+    - "Austin Macdonald (@asmacdo)"
 description:
   - Communicates custom metrics to a server to be created or updated
   - Please reference the Prometheus docs for metric usage https://prometheus.io/docs/concepts/metric_types/
@@ -92,7 +94,7 @@ options:
         type: bool
         required: False
         description:
-        - Instructs the controller to reset the gauge time. TODO(asmacdo)
+        - Instructs the controller to set the gauge to the current time.
   histogram:
     type: dict
     required: False
@@ -151,11 +153,19 @@ EXAMPLES = """
     description: Observe my summary
     summary:
       observe: 2
-
-# TODO(asmacdo) what happens if you use a different metric type for an existing metric name?
-- """
+"""
 
 RETURN = """
+msg:
+  description:
+    - A description of the error encountered.
+    - only returned if the task fails
+  type: string
+status_code:
+  description:
+    - HTTP status code from the Operator SDK API server
+    - only returns if status code is not 200 OK
+  type: int
 """
 
 from ansible.module_utils.basic import AnsibleModule
@@ -206,7 +216,7 @@ def main():
 
     response = requests.post(url, json=payload)
     if response.status_code != 200:
-        module.fail_json(msg=response.text)
+        module.fail_json(msg=response.text, status_code=response.status_code)
 
     module.exit_json(changed=True)
 
