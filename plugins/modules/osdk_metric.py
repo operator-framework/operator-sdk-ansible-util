@@ -159,13 +159,14 @@ RETURN = """
 msg:
   description:
     - A description of the error encountered.
-    - only returned if the task fails
-  type: string
+  returned: if the task fails
+  type: str
 status_code:
   description:
     - HTTP status code from the Operator SDK API server
     - only returns if status code is not 200 OK
   type: int
+  returned: if the task fails
 """
 
 from ansible.module_utils.basic import AnsibleModule
