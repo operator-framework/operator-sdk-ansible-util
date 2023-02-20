@@ -277,12 +277,13 @@ class KubernetesEvent(AnsibleModule):
         involved_obj = self.params.get("involvedObject")
         if involved_obj:
             try:
-                involved_object_resource = find_resource(self.client, involved_obj["kind"], "v1")
-                api_involved_object = involved_object_resource.get(
-                    name=involved_obj["name"], namespace=involved_obj["namespace"])
+                involved_object_resource = find_resource(self.client, involved_obj["kind"], involved_obj.get("apiVersion", "v1"))
+                if involved_object_resource:
+                    api_involved_object = involved_object_resource.get(
+                        name=involved_obj["name"], namespace=involved_obj["namespace"])
 
-                involved_obj["uid"] = api_involved_object["metadata"]["uid"]
-                involved_obj["resourceVersion"] = api_involved_object["metadata"]["resourceVersion"]
+                    involved_obj["uid"] = api_involved_object["metadata"]["uid"]
+                    involved_obj["resourceVersion"] = api_involved_object["metadata"]["resourceVersion"]
 
             except openshift.dynamic.exceptions.NotFoundError:
                 pass
