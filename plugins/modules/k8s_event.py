@@ -277,7 +277,7 @@ class KubernetesEvent(AnsibleModule):
         involved_obj = self.params.get("involvedObject")
         if involved_obj:
             try:
-                involved_object_resource = find_resource(self.client, involved_obj["kind"], involved_obj.get("apiVersion", "v1"))
+                involved_object_resource = find_resource(self.client, involved_obj["kind"], involved_obj.get("apiVersion", involved_obj["apiVersion"]))
                 if involved_object_resource:
                     api_involved_object = involved_object_resource.get(
                         name=involved_obj["name"], namespace=involved_obj["namespace"])
