@@ -30,7 +30,7 @@ To run sanity tests locally, run
 make test-sanity
 ```
 
-To run the molecule integration tests, ensure you have molecule and the openshift python client installed and run
+To run the molecule integration tests, ensure you have molecule and the kubernetes python client installed and run
 
 ```
 make test-molecule

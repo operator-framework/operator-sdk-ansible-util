@@ -95,7 +95,7 @@ options:
 
 requirements:
   - python >= 2.7
-  - openshift >= 0.6.2
+  - kubernetes >= 25.3.0
 """
 
 EXAMPLES = """
@@ -185,7 +185,7 @@ try:
         get_api_client,
         find_resource,
     )
-    import openshift
+    import kubernetes
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
@@ -261,7 +261,7 @@ class KubernetesEvent(AnsibleModule):
             prior_event = resource.get(
                 name=metadata["name"],
                 namespace=metadata["namespace"])
-        except openshift.dynamic.exceptions.NotFoundError:
+        except kubernetes.dynamic.exceptions.NotFoundError:
             pass
 
         prior_count = 1
@@ -285,7 +285,7 @@ class KubernetesEvent(AnsibleModule):
                     involved_obj["uid"] = api_involved_object["metadata"]["uid"]
                     involved_obj["resourceVersion"] = api_involved_object["metadata"]["resourceVersion"]
 
-            except openshift.dynamic.exceptions.NotFoundError:
+            except kubernetes.dynamic.exceptions.NotFoundError:
                 pass
 
         # Return data
@@ -300,7 +300,7 @@ class KubernetesEvent(AnsibleModule):
 
         try:
             instance = v1_events.get(name=self.params.get("name"), namespace=self.params.get("namespace"))
-        except openshift.dynamic.exceptions.NotFoundError:
+        except kubernetes.dynamic.exceptions.NotFoundError:
             try:
                 created_event = v1_events.create(body=event, namespace=self.params.get("namespace"))
                 return dict(result=created_event.to_dict(), changed=True)

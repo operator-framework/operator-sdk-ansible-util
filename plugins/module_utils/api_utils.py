@@ -16,8 +16,8 @@ try:
         AUTH_ARG_MAP,
     )
     import kubernetes
-    from openshift.dynamic import DynamicClient
-    from openshift.dynamic.exceptions import (ResourceNotFoundError, ResourceNotUniqueError)
+    from kubernetes.dynamic import DynamicClient
+    from kubernetes.dynamic.exceptions import (ResourceNotFoundError, ResourceNotUniqueError)
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
