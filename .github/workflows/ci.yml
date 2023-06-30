@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install ansible and kubernetes dependencies
-        run: pip install ansible~=2.15.0 yamllint kubernetes flake8 pycodestyle pylint ansible-lint
+        run: pip install ansible-core~=2.15.0 yamllint kubernetes flake8 pycodestyle pylint ansible-lint
 
       - name: Ensure collection dependency exists
         run: ansible-galaxy collection install kubernetes.core
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.7']
+        python_version: ['3.9']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -55,7 +55,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install molecule and kubernetes dependencies
-        run: pip install ansible~=2.9.15 molecule yamllint kubernetes flake8
+        run: pip install ansible-core~=2.15.0 molecule yamllint kubernetes flake8
 
       - name: Ensure collection dependency exists
         run: ansible-galaxy collection install kubernetes.core
