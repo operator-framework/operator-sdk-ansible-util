@@ -17,7 +17,10 @@ release: build
 install: build
 	ansible-galaxy collection install -p ansible_collections operator_sdk-util-${VERSION}.tar.gz
 
-test-sanity: install
+test-lint: install
+	ansible-lint --profile safety
+
+test-sanity: test-lint
 	set -x && cd ansible_collections/operator_sdk/util && ansible-test sanity -v $(TEST_ARGS)
 
 test-molecule: install

@@ -29,9 +29,12 @@
     namespace: '{{ namespace }}'
   register: event_obj
 
-- debug: var=event_obj
+- name: Debug event results
+  debug:
+    var: event_obj
 
-- assert:
+- name: Assert event checks
+  assert:
     that:
       - event_obj.resources.0.metadata.name == 'test-name'
       - event_obj.resources.0.message == 'test-message'

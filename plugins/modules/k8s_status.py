@@ -414,14 +414,12 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
     def object_contains(self, obj, subset):
         def dict_is_subset(obj, subset):
             return all(
-                [
-                    (
-                        mapping["default"]
-                        if self.replace_lists and isinstance(obj.get(k), list) and k != "conditions"
-                        else mapping.get(type(obj.get(k)), mapping["default"])
-                    )(obj.get(k), v)
-                    for (k, v) in subset.items()
-                ]
+                (
+                    mapping["default"]
+                    if self.replace_lists and isinstance(obj.get(k), list) and k != "conditions"
+                    else mapping.get(type(obj.get(k)), mapping["default"])
+                )(obj.get(k), v)
+                for (k, v) in subset.items()
             )
 
         def list_is_subset(obj, subset):

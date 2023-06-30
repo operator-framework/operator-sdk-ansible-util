@@ -57,6 +57,7 @@ options:
     description:
     - Determines whether to override the default patch merge type with the specified.
     - The default is strategic merge.
+    elements: str
     choices:
       - "json"
       - "merge"
@@ -85,10 +86,31 @@ options:
   source:
     type: dict
     description: EventSource
-      - Component for reporting this Event
+    suboptions:
+      component:
+        description: Component for reporting this Event.
+        type: str
+        required: true
   involvedObject:
     type: dict
     description: The object that this event is about.
+    suboptions:
+      apiVersion:
+        description: The apiVersion.
+        type: str
+        required: true
+      kind:
+        description: Resource kind.
+        type: str
+        required: true
+      name:
+        description: Resource name.
+        type: str
+        required: true
+      namespace:
+        description: Resource namespace.
+        type: str
+        required: true
   appendTimestamp:
     type: bool
     description: Event name should have timestamp appended to it
@@ -126,51 +148,54 @@ result:
   returned: success
   type: complex
   contains:
-    contains:
-     namespace:
-       description: Namespace defines the space within which each name must be unique
-       returned: success
-       type: str
-     name:
-       description: The unique name of the resource.
-       returned: success
-       type: str
-     count:
-       description: Count of event occurrences
-       returned: success
-       type: int
-     message:
-       description: A human-readable description of the status of this operation.
-       returned: success
-       type: dict
-     kind:
-       description: Always 'Event'.
-       returned: success
-       type: str
-     firstTimestamp:
-       description: Timestamp of first occurrence of Event
-       returned: success
-       type: timestamp
-     reason:
-       description: Machine understandable string that gives the reason for the transition into the object's status.
-       returned: success
-       type: dict
-     reportingComponent:
-       description: Name of the controller that emitted this Event
-       returned: success
-     type:
-       description: Type of this event. New types could be added in the future.
-       returned: success
-     source:
-       description: The component reporting this event.
-       returned: success
-     lastTimestamp:
-       description: Timestamp of last occurrence of Event
-       returned: success
-       type: timestamp
-     involvedObject:
-       description: The object that this event is about.
-       returned: success
+   namespace:
+     description: Namespace defines the space within which each name must be unique
+     returned: success
+     type: str
+   name:
+     description: The unique name of the resource.
+     returned: success
+     type: str
+   count:
+     description: Count of event occurrences
+     returned: success
+     type: int
+   message:
+     description: A human-readable description of the status of this operation.
+     returned: success
+     type: dict
+   kind:
+     description: Always 'Event'.
+     returned: success
+     type: str
+   firstTimestamp:
+     description: Timestamp of first occurrence of Event
+     returned: success
+     type: str
+   reason:
+     description: Machine understandable string that gives the reason for the transition into the object's status.
+     returned: success
+     type: dict
+   reportingComponent:
+     description: Name of the controller that emitted this Event
+     returned: success
+     type: str
+   type:
+     description: Type of this event. New types could be added in the future.
+     returned: success
+     type: str
+   source:
+     description: The component reporting this event.
+     returned: success
+     type: dict
+   lastTimestamp:
+     description: Timestamp of last occurrence of Event
+     returned: success
+     type: str
+   involvedObject:
+     description: The object that this event is about.
+     returned: success
+     type: dict
 """
 
 import copy
@@ -197,7 +222,7 @@ EVENT_ARG_SPEC = {
     "state": {"default": "present", "choices": ["present", "absent"]},
     "name": {"required": True},
     "namespace": {"required": True},
-    "merge_type": {"type": "list", "choices": ["json", "merge", "strategic-merge"]},
+    "merge_type": {"type": "list", "elements": "str", "choices": ["json", "merge", "strategic-merge"]},
     "message": {"type": "str", "required": True},
     "reason": {"type": "str", "required": True},
     "reportingComponent": {"type": "str"},
@@ -205,14 +230,18 @@ EVENT_ARG_SPEC = {
     "appendTimestamp": {"type": "bool"},
     "source": {
         "type": "dict",
-        "component": {"type": "str", "required": True}
+        "options": {
+            "component": {"type": "str", "required": True}
+        }
     },
     "involvedObject": {
         "type": "dict",
-        "apiVersion": {"type": "str", "required": True},
-        "kind": {"type": "str", "required": True},
-        "name": {"type": "str", "required": True},
-        "namespace": {"type": "str", "required": True},
+        "options": {
+            "apiVersion": {"type": "str", "required": True},
+            "kind": {"type": "str", "required": True},
+            "name": {"type": "str", "required": True},
+            "namespace": {"type": "str", "required": True},
+        }
     }
 }
 

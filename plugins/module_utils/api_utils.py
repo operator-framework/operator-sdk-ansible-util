@@ -47,7 +47,7 @@ def get_api_client(module=None):
                 auth[true_name] = env_value
 
     def auth_set(*names):
-        return all([auth.get(name) for name in names])
+        return all(auth.get(name) for name in names)
 
     if auth_set('username', 'password', 'host') or auth_set('api_key', 'host'):
         # We have enough in the parameters to authenticate, no need to load incluster or kubeconfig
