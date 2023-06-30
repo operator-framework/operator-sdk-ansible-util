@@ -32,9 +32,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
+- name: Debug CR results
+  debug:
+    var: test_cr
 
-- assert:
+- name: Assert CR checks
+  assert:
     that:
       - test_cr.resources.0.status.hello == 'world'
       - condition.type == 'Available'
@@ -69,9 +72,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
+- name: Debug CR results
+  debug:
+    var: test_cr
 
-- assert:
+- name: Assert CR checks
+  assert:
     that:
       - test_cr.resources.0.status.hello == 'everybody'
       - (test_cr.resources.0.status.conditions | length) == 2
@@ -110,9 +116,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
+- name: Debug CR results
+  debug:
+    var: test_cr
 
-- assert:
+- name: Assert CR checks
+  assert:
     that:
       - test_cr.resources.0.status.hello is not defined
       - condition.type == 'Available'
@@ -145,9 +154,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
+- name: Debug CR results
+  debug:
+    var: test_cr
 
-- assert:
+- name: Assert CR checks
+  assert:
     that:
       - test_cr.resources.0.status.hello == 'world'
       - condition.type == 'Available'

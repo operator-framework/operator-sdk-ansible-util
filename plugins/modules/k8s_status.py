@@ -93,7 +93,7 @@ options:
 
 requirements:
     - "python >= 3.7"
-    - "openshift >= 0.8.1"
+    - "kubernetes >= 25.3.0"
 """
 
 EXAMPLES = """
@@ -179,8 +179,8 @@ try:
         AUTH_ARG_SPEC,
         NAME_ARG_SPEC
     )
-    import openshift
-    from openshift.dynamic.exceptions import DynamicApiError
+    import kubernetes
+    from kubernetes.dynamic.exceptions import DynamicApiError
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
@@ -285,10 +285,10 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
         super(KubernetesAnsibleStatusModule, self).__init__(*args, argument_spec=self.argspec, **kwargs)
         if not HAS_K8S_MODULE_HELPER:
             self.fail_json(
-                msg=missing_required_lib('openshift'),
+                msg=missing_required_lib('kubernetes'),
                 exception=K8S_IMP_ERR,
                 error=to_native(k8s_import_exception))
-        self.openshift_version = openshift.__version__
+        self.kubernetes_version = kubernetes.__version__
 
         self.kind = self.params.get("kind")
         self.api_version = self.params.get("api_version")
@@ -414,14 +414,12 @@ class KubernetesAnsibleStatusModule(AnsibleModule):
     def object_contains(self, obj, subset):
         def dict_is_subset(obj, subset):
             return all(
-                [
-                    (
-                        mapping["default"]
-                        if self.replace_lists and isinstance(obj.get(k), list) and k != "conditions"
-                        else mapping.get(type(obj.get(k)), mapping["default"])
-                    )(obj.get(k), v)
-                    for (k, v) in subset.items()
-                ]
+                (
+                    mapping["default"]
+                    if self.replace_lists and isinstance(obj.get(k), list) and k != "conditions"
+                    else mapping.get(type(obj.get(k)), mapping["default"])
+                )(obj.get(k), v)
+                for (k, v) in subset.items()
             )
 
         def list_is_subset(obj, subset):

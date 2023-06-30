@@ -1,0 +1,7 @@
+plugins/modules/k8s_status.py validate-modules:missing-gplv3-license
+plugins/modules/requeue_after.py validate-modules:missing-gplv3-license
+plugins/modules/k8s_event.py validate-modules:missing-gplv3-license
+plugins/modules/k8s_event.py validate-modules:invalid-argument-name # message parameter not allowed
+plugins/modules/k8s_event.py validate-modules:nonexistent-parameter-documented
+plugins/modules/k8s_status.py validate-modules:invalid-argument-name # message parameter not allowed
+plugins/modules/k8s_status.py validate-modules:nonexistent-parameter-documented # message parameter not allowed

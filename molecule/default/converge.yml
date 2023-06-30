@@ -5,7 +5,7 @@
   gather_facts: no
 
   collections:
-    - community.kubernetes
+    - kubernetes.core
     - operator_sdk.util
 
   tasks:
@@ -23,13 +23,15 @@
       k8s:
         src: files/crd.yaml
 
-    - block:
+    - name: Run doc examples tests
+      block:
         - name: Create namespace
           k8s:
             kind: Namespace
             name: osdkau-test-doc-examples
 
-        - import_tasks: tasks/doc_examples.yml
+        - name: Import doc examples tests
+          import_tasks: tasks/doc_examples.yml
           vars:
             namespace: osdkau-test-doc-examples
       always:
@@ -40,13 +42,15 @@
             state: absent
             wait: yes
 
-    - block:
+    - name: Run advanced usage tests
+      block:
         - name: Create namespace
           k8s:
             kind: Namespace
             name: osdkau-test-advanced-usage
 
-        - import_tasks: tasks/advanced_usage.yml
+        - name: Import advanced usage tests
+          import_tasks: tasks/advanced_usage.yml
           vars:
             namespace: osdkau-test-advanced-usage
       always:
@@ -57,13 +61,15 @@
             state: absent
             wait: yes
 
-    - block:
+    - name: Run expected failures testes
+      block:
         - name: Create namespace
           k8s:
             kind: Namespace
             name: osdkau-test-failure-modes
 
-        - import_tasks: tasks/failure_modes.yml
+        - name: Import expected failures tests
+          import_tasks: tasks/failure_modes.yml
           vars:
             namespace: osdkau-test-failure-modes
       always:
@@ -74,13 +80,15 @@
             state: absent
             wait: yes
 
-    - block:
+    - name: Run k8s events tests
+      block:
         - name: Create namespace
           k8s:
             kind: Namespace
             name: osdkau-test-k8s-events
 
-        - import_tasks: tasks/k8s_events.yml
+        - name: Import k8s events tests
+          import_tasks: tasks/k8s_events.yml
           vars:
             namespace: osdkau-test-k8s-events
       always:

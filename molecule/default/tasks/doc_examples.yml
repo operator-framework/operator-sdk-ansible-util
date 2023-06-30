@@ -28,9 +28,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
+- name: Debug CR results
+  debug:
+    var: test_cr
 
-- assert:
+- name: Assert CR checks
+  assert:
     that:
       - test_cr.resources.0.status.hello == 'world'
       - test_cr.resources.0.status.custom == 'entries'
@@ -56,8 +59,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
-- assert:
+- name: Debug CR results
+  debug:
+    var: test_cr
+
+- name: Assert CR checks
+  assert:
     that:
       - condition.type == 'Running'
       - condition.status == 'True'
@@ -90,8 +97,12 @@
     namespace: '{{ namespace }}'
   register: test_cr
 
-- debug: var=test_cr
-- assert:
+- name: Debug CR results
+  debug:
+    var: test_cr
+
+- name: Assert CR checks
+  assert:
     that:
       - condition.type == 'Available'
       - condition.status == 'False'

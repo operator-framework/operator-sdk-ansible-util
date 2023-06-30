@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.7']
+        python_version: ['3.9']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -24,11 +24,11 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible and openshift dependencies
-        run: pip install ansible~=2.9.27 yamllint openshift flake8 pycodestyle pylint
+      - name: Install ansible and kubernetes dependencies
+        run: pip install ansible-core~=2.15.0 yamllint kubernetes flake8 pycodestyle pylint ansible-lint
 
       - name: Ensure collection dependency exists
-        run: ansible-galaxy collection install community.kubernetes
+        run: ansible-galaxy collection install kubernetes.core
 
       - name: Run sanity tests on Python ${{ matrix.python_version }}
         run: TEST_ARGS="--docker --color --python ${{ matrix.python_version }}" make test-sanity
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.7']
+        python_version: ['3.9']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -54,11 +54,11 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install molecule and openshift dependencies
-        run: pip install ansible~=2.9.15 molecule yamllint openshift flake8
+      - name: Install molecule and kubernetes dependencies
+        run: pip install ansible-core~=2.15.0 molecule yamllint kubernetes flake8
 
       - name: Ensure collection dependency exists
-        run: ansible-galaxy collection install community.kubernetes
+        run: ansible-galaxy collection install kubernetes.core
 
       - name: Run molecule default test scenario
         run: make test-molecule
