@@ -127,7 +127,7 @@ EXAMPLES = """
     name: test-k8s-event
     namespace: default
     message: Event created
-    merge-type: strategic-merge
+    merge_type: strategic-merge
     reason: Testing event creation
     reportingComponent: Reporting components
     appendTimestamp: true
